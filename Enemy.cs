@@ -2,32 +2,32 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Enemy : PoolableObject, IDamageable
+public class Enemy : MonoBehaviour, IDamageable
 {
     public AttackRadius AttackRadius;
-    public Animator Animator;
     public EnemyMovement Movement;
-    public NavMeshAgent Agent;
-    public EnemyScriptableObject EnemyScriptableObject;
     public int Health = 100;
-
+    public Spawner spawn;
+    public GameObject interactPoints;
     private Coroutine LookCoroutine;
-    private const string ATTACK_TRIGGER = "Attack";
+    public bool dead;
+    
+
+    [SerializeField] private AudioSource deathSoundEffect;
 
     private void Awake()
     {
+        //Health = 100;
         AttackRadius.OnAttack += OnAttack;
     }
 
     private void OnAttack(IDamageable Target)
     {
-        Animator.SetTrigger(ATTACK_TRIGGER);
-
         if (LookCoroutine != null)
         {
             StopCoroutine(LookCoroutine);
         }
-
+        
         LookCoroutine = StartCoroutine(LookAt(Target.GetTransform()));
     }
 
@@ -47,47 +47,19 @@ public class Enemy : PoolableObject, IDamageable
         transform.rotation = lookRotation;
     }
 
-    public virtual void OnEnable()
-    {
-        SetupAgentFromConfiguration();
-    }
-
-    public override void OnDisable()
-    {
-        base.OnDisable();
-
-        Agent.enabled = false;
-    }
-
-    public virtual void SetupAgentFromConfiguration()
-    {
-        Agent.acceleration = EnemyScriptableObject.Acceleration;
-        Agent.angularSpeed = EnemyScriptableObject.AngularSpeed;
-        Agent.areaMask = EnemyScriptableObject.AreaMask;
-        Agent.avoidancePriority = EnemyScriptableObject.AvoidancePriority;
-        Agent.baseOffset = EnemyScriptableObject.BaseOffset;
-        Agent.height = EnemyScriptableObject.Height;
-        Agent.obstacleAvoidanceType = EnemyScriptableObject.ObstacleAvoidanceType;
-        Agent.radius = EnemyScriptableObject.Radius;
-        Agent.speed = EnemyScriptableObject.Speed;
-        Agent.stoppingDistance = EnemyScriptableObject.StoppingDistance;
-        
-        Movement.UpdateRate = EnemyScriptableObject.AIUpdateInterval;
-
-        Health = EnemyScriptableObject.Health;
-
-        (AttackRadius.Collider == null ? AttackRadius.GetComponent<SphereCollider>() : AttackRadius.Collider).radius = EnemyScriptableObject.AttackRadius;
-        AttackRadius.AttackDelay = EnemyScriptableObject.AttackDelay;
-        AttackRadius.Damage = EnemyScriptableObject.Damage;
-    }
-
     public void TakeDamage(int Damage)
     {
         Health -= Damage;
-
-        if (Health <= 0)
+        interactPoints.GetComponent<Interactor>().points += 10;
+        if (Health <= 0 && !dead)
         {
+            interactPoints.GetComponent<Interactor>().points += 100;
+            spawn.amountKilled ++;
+            spawn.totalEnemiesKilled ++;
             gameObject.SetActive(false);
+            print("walterJr");
+            dead = true;
+            deathSoundEffect.Play();
         }
     }
 

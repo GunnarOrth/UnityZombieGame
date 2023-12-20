@@ -13,7 +13,7 @@ public class Guns : MonoBehaviour
     public int magazineSize, bulletsPerTap;
     public bool allowButtonHold;
 
-    private int bulletsLeft, bulletsShot;
+    public int bulletsLeft, bulletsShot;
     private bool shooting, readyToShoot, reloading;
 
     public Camera fpsCam;
@@ -40,6 +40,11 @@ public class Guns : MonoBehaviour
 
     public int maxAmmo = 300;
     public TextMeshProUGUI maxAmmoDisplay;
+
+    [SerializeField] private AudioSource shootSoundEffect;
+    [SerializeField] private AudioSource reloadSoundEffect;
+
+    public int damage = 50;
     //public float damage = 20;
 
     private void Awake()
@@ -90,7 +95,7 @@ public class Guns : MonoBehaviour
     {
         
         readyToShoot = false;
-
+        shootSoundEffect.Play();
         Ray ray = fpsCam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         RaycastHit hit;
 
@@ -115,7 +120,7 @@ public class Guns : MonoBehaviour
         Vector3 directionWithSpread = directionWithoutSpread + new Vector3(x,y, 0);
 
         GameObject currentBullet = Instantiate(bullet, attackPoint.position, Quaternion.identity);
-
+        currentBullet.GetComponent<CustomBullet>().damage = damage;
         currentBullet.transform.forward = directionWithSpread.normalized;
 
         currentBullet.GetComponent<Rigidbody>().AddForce(directionWithSpread.normalized * shootForce, ForceMode.Impulse);
@@ -155,6 +160,7 @@ public class Guns : MonoBehaviour
     private void Reload()
     {
         reloading = true;
+        reloadSoundEffect.Play();
         Invoke("ReloadFinished", reloadTime);
     }
 

@@ -7,11 +7,13 @@ public class AttackRadius : MonoBehaviour
 {
     public SphereCollider Collider;
     private List<IDamageable> Damageables = new List<IDamageable>();
-    public int Damage = 10;
-    public float AttackDelay = 0.5f;
+    public int Damage = 20;
+    public float AttackDelay = 0.3f;
     public delegate void AttackEvent(IDamageable Target);
     public AttackEvent OnAttack;
     private Coroutine AttackCoroutine;
+    [SerializeField] private AudioSource attackSoundEffect;
+    public Animator animator;
 
     private void Awake()
     {
@@ -28,6 +30,7 @@ public class AttackRadius : MonoBehaviour
             if (AttackCoroutine == null)
             {
                 AttackCoroutine = StartCoroutine(Attack());
+                animator.SetBool("isAttacking", true);
             }
         }
     }
@@ -42,12 +45,14 @@ public class AttackRadius : MonoBehaviour
             {
                 StopCoroutine(AttackCoroutine);
                 AttackCoroutine = null;
+                 animator.SetBool("isAttacking", false);
             }
         }
     }
 
     private IEnumerator Attack()
     {
+        attackSoundEffect.Play();
         WaitForSeconds Wait = new WaitForSeconds(AttackDelay);
 
         yield return Wait;

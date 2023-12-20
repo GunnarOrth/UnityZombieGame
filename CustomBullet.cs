@@ -25,8 +25,8 @@ public class CustomBullet : MonoBehaviour
     int collisions;
     PhysicMaterial physics_mat;
 
-    public TextMeshProUGUI pointDisplay;
-    public int points;
+    //public TextMeshProUGUI pointDisplay;
+    //public Interactor interactor;
 
     private void Setup()
     {
@@ -60,6 +60,7 @@ public class CustomBullet : MonoBehaviour
 
         if(collision.collider.CompareTag("Enemy") && explodeOnTouch){
             collision.gameObject.GetComponent<Enemy>().TakeDamage(damage);
+            //interactor.points += 10;
             //collision.TakeDamage(damage);
             Explode();
         } 
